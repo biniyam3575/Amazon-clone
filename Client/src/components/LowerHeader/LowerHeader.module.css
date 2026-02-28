@@ -1,5 +1,5 @@
 .lower_header {
-  background-color: #232f3e; /* Standard Amazon sub-nav color */
+  background-color: #232f3e; 
   color: white;
   height: 39px;
   display: flex;
@@ -17,7 +17,6 @@
   width: 100%;
 }
 
-/* Individual link items */
 .nav_item, .all_menu {
   display: flex;
   align-items: center;
