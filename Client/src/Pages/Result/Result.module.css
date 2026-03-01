@@ -1,0 +1,18 @@
+.results_container {
+    padding: 20px;
+    background-color: #f7f7f7;
+    min-height: 80vh;
+}
+
+.products_grid {
+    display: grid;
+    /* Responsive grid: creates columns automatically */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Ensure the cards look uniform within the grid */
+.products_grid > div {
+    height: 100%;
+}

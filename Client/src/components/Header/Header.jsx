@@ -1,10 +1,12 @@
-import React from 'react';
 import { IoMdSearch } from "react-icons/io";
 import { SlLocationPin } from "react-icons/sl";
 import { BiCaretDown } from "react-icons/bi";
 import flag from '../../assets/icons/image.png'; 
 import cart from '../../assets/icons/cart.png';
+import logo from '../../assets/icons/Amazon_logo.png'
 import classes from './Header.module.css'; 
+import { Link } from "react-router";
+
 
 const Header = () => {
   return (
@@ -13,9 +15,9 @@ const Header = () => {
         
         {/* Logo */}
         <div className={classes.header_logo_container}>
-          <a href="/">
-            <img className={classes.logo} src="https://pngimg.com/uploads/amazon/amazon_PNG11.png" alt="amazon logo" />
-          </a>
+          <Link to="/">
+            <img className={classes.logo} src={logo} alt="amazon logo" />
+          </Link>
         </div>
 
         {/* Delivery */}
@@ -47,26 +49,26 @@ const Header = () => {
             </span>
           </div>
 
-          <a href="/" className={classes.nav_item}>
+          <Link to="/signin" className={classes.nav_item}>
             <p className={classes.text_light}>Hello, sign in</p>
             <span className={classes.text_bold}>
               Account & Lists <BiCaretDown className={classes.caret} />
             </span>
-          </a>
+          </Link>
 
-          <a href="/" className={classes.nav_item}>
+          <Link to="/order" className={classes.nav_item}>
             <p className={classes.text_light}>Returns</p>
             <span className={classes.text_bold}>& Orders</span>
-          </a>
+          </Link>
 
           {/* Fixed Cart */}
-          <a href="/" className={classes.cart_container}>
+          <Link to="/cart" className={classes.cart_container}>
             <div className={classes.cart_icon_wrapper}>
                 <span className={classes.cart_count}>0</span>
                 <img src={cart} alt="cart" className={classes.cart_image} />
             </div>
             <span className={classes.nav_cart_text}>Cart</span>
-          </a>
+          </Link>
         </div>
       </div>
     </header>

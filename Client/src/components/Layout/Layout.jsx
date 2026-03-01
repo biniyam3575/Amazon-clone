@@ -1,13 +1,15 @@
-import React from 'react'
+// components/Layout/Layout.jsx
 import Header from '../Header/Header.jsx'
 import Footer from '../Footer/Footer.jsx'
 
-const Layout = ({children}) => {
+const Layout = ({ children }) => {
   return (
-    <div>
-        <Header/>
-        {children}
-        <Footer/>
+    <div className="layout-container">
+        <Header />
+        <main className="main-content">
+            {children}
+        </main>
+        <Footer />
     </div>
   )
 }
