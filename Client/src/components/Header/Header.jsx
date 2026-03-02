@@ -6,9 +6,13 @@ import cart from '../../assets/icons/cart.png';
 import logo from '../../assets/icons/Amazon_logo.png'
 import classes from './Header.module.css'; 
 import { Link } from "react-router";
+import { useContext } from "react";
+import { DataContext } from "../DataProvider/DataProvider";
 
 
 const Header = () => {
+  const [state,dispatch] = useContext(DataContext);
+
   return (
     <header className={classes.amazon_header}>
       <div className={classes.inner_container}>
@@ -64,7 +68,7 @@ const Header = () => {
           {/* Fixed Cart */}
           <Link to="/cart" className={classes.cart_container}>
             <div className={classes.cart_icon_wrapper}>
-                <span className={classes.cart_count}>0</span>
+                <span className={classes.cart_count}>{state.cart.length}</span>
                 <img src={cart} alt="cart" className={classes.cart_image} />
             </div>
             <span className={classes.nav_cart_text}>Cart</span>

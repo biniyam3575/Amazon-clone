@@ -1,10 +1,20 @@
 import classes from './ProductCard.module.css';
 import Rating from '@mui/material/Rating'; 
+import { useContext } from 'react';
 import { Link } from 'react-router';
+import { DataContext } from '../DataProvider/DataProvider';
+import {Type} from '../../Utils/action.type'
 
 const ProductCard = ({ data }) => {
     const { id, title, image, price, rating } = data;
 
+    const [state,dispatch] = useContext(DataContext);
+    const addToCart = () => {
+        dispatch({
+            type: Type.ADD_TO_CART,
+            item: data
+        })
+    }
     return (
         <div className={classes.card_container}>
             <Link to={`/product/${id}`} className={classes.card_link}>
@@ -21,7 +31,7 @@ const ProductCard = ({ data }) => {
             
             <div className={classes.price_and_button}>
                 <p className={classes.price}>${price}</p>
-                <button className={classes.button}>Add to cart</button>
+                <button className={classes.button} onClick={addToCart}>Add to cart</button>
             </div>
         </div>
     );
