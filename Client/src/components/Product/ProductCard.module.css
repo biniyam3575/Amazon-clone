@@ -73,3 +73,21 @@
     opacity: 1;
     visibility: visible;
 }
+.card_link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer; /* This gives you the hand icon */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure the container doesn't look weird as a link */
+.card_container {
+    /* ... keep your existing styles ... */
+    cursor: pointer; /* Add this to the container if you want the whole card clickable */
+}
+
+/* Override link styles if needed */
+.card_link h3 {
+    color: #000;
+}

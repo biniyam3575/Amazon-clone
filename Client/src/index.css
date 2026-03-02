@@ -5,13 +5,17 @@
 body{
   background-color: #f7f7f7;
 }
-/* index.css */
-.layout-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Takes at least the full height of the screen */
+#root {
+  min-height: 100vh;
 }
 
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; 
+}
 .main-content {
-    flex: 1; /* Pushes the footer down when content is sparse */
+  flex: 1; 
+  display: flex; 
+  flex-direction: column;
 }
