@@ -1,42 +1,106 @@
-import React, { useContext } from 'react';
-import Layout from '../../components/Layout/Layout';
-import { DataContext } from '../../components/DataProvider/DataProvider';
-import { Type } from '../../Utils/action.type';
-import classes from './Cart.module.css';
+import React, { useContext, useMemo } from "react";
+import Layout from "../../components/Layout/Layout";
+import { DataContext } from "../../components/DataProvider/DataProvider";
+import { Type } from "../../Utils/action.type";
+import classes from "./Cart.module.css";
 
 const Cart = () => {
+  const [itemToDelete, setItemToDelete] = React.useState(null);
   const [{ cart }, dispatch] = useContext(DataContext);
 
-  // Grouping logic for the UI
-  const groupedItems = cart.reduce((acc, item) => {
-    const existing = acc.find(i => i.id === item.id);
-    if (existing) { existing.amount += 1; } 
-    else { acc.push({ ...item, amount: 1 }); }
-    return acc;
-  }, []);
-
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const total = useMemo(() => {
+    return cart.reduce((sum, item) => sum + item.price * item.amount, 0);
+  }, [cart]);
 
   return (
-    <Layout>
+    <>
+          {itemToDelete && (
+      <div className={classes.modal_overlay}>
+        <div className={classes.modal}>
+          <h3>Remove Item</h3>
+          <p>Are you sure you want to remove this item from the cart?</p>
+
+          <div className={classes.modal_buttons}>
+            <button
+              className={classes.cancel_btn}
+              onClick={() => setItemToDelete(null)}
+            >
+              Cancel
+            </button>
+
+            <button
+              className={classes.confirm_btn}
+              onClick={() => {
+                dispatch({
+                  type: Type.REMOVE_FROM_CART,
+                  id: itemToDelete.id,
+                });
+                setItemToDelete(null);
+              }}
+            >
+              Yes, Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+     <Layout>
       <section className={classes.cart_container}>
         <div className={classes.cart_left}>
           <h1>Shopping Cart</h1>
-          {groupedItems.length === 0 ? <p>Your cart is empty.</p> : (
-            groupedItems.map((item) => (
+
+          {cart.length === 0 ? (
+            <p>Your cart is empty.</p>
+          ) : (
+            cart.map((item) => (
               <div key={item.id} className={classes.cart_item}>
                 <img src={item.image} alt={item.title} />
+
                 <div className={classes.cart_details}>
                   <h3>{item.title}</h3>
+
                   <div className={classes.controls}>
-                    <select value={item.amount} onChange={(e) => dispatch({ type: Type.UPDATE_QTY, id: item.id, qty: parseInt(e.target.value) })}>
-                      {[...Array(10).keys()].map(x => <option key={x+1} value={x+1}>{x+1}</option>)}
-                    </select>
-                    <span className={classes.pipe}>|</span>
-                    <button onClick={() => dispatch({ type: Type.REMOVE_FROM_CART, id: item.id })}>Delete</button>
+                    <div className={classes.qty_buttons}>
+                      <button
+                        onClick={() =>
+                          dispatch({
+                            type: Type.UPDATE_QTY,
+                            id: item.id,
+                            qty: item.amount + 1,
+                          })
+                        }
+                      >
+                        +
+                      </button>
+
+                      <span>{item.amount}</span>
+
+                      <button
+                        onClick={() =>
+                          dispatch({
+                            type: Type.UPDATE_QTY,
+                            id: item.id,
+                            qty: item.amount - 1,
+                          })
+                        }
+                        disabled={item.amount <= 1}
+                      >
+                        −
+                      </button>
+                    </div>
+
+                    <button
+                    className={classes.delete_btn}
+                    onClick={() => setItemToDelete(item)}
+                  >
+                    Delete
+                  </button>
                   </div>
                 </div>
-                <div className={classes.cart_price}>${item.price.toFixed(2)}</div>
+
+                <div className={classes.cart_price}>
+                  ${(item.price * item.amount).toFixed(2)}
+                </div>
               </div>
             ))
           )}
@@ -44,12 +108,20 @@ const Cart = () => {
 
         <div className={classes.cart_right}>
           <div className={classes.subtotal_box}>
-            <p>Subtotal ({cart.length} items): <strong>${total.toFixed(2)}</strong></p>
-            <button className={classes.checkout_btn}>Proceed to checkout</button>
+            <p>
+              Subtotal ({cart.reduce((a, c) => a + c.amount, 0)} items):{" "}
+              <strong>${total.toFixed(2)}</strong>
+            </p>
+            <button className={classes.checkout_btn}>
+              Proceed to checkout
+            </button>
           </div>
         </div>
       </section>
     </Layout>
+    </>
+   
   );
 };
+
 export default Cart;

@@ -11,7 +11,7 @@ const CarouselEffect = () => {
             showIndicators={false}   // Amazon usually uses simple arrows or hidden dots
             showThumbs={false}       // Hides the row of small thumbnails
             showStatus={false}       // Hides "1 of 5" status text
-            interval={3000}          // 5 seconds between slides
+            interval={3000}          // 3 seconds between slides
             transitionTime={1000}     // Smooth animation
         >
             {img.map((imgLink) =>{
