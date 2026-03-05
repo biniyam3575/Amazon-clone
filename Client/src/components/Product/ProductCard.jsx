@@ -1,13 +1,13 @@
 import classes from './ProductCard.module.css';
 import Rating from '@mui/material/Rating'; 
-import { useContext } from 'react';
+import { useContext ,useState} from 'react';
 import { Link } from 'react-router';
 import { DataContext } from '../DataProvider/DataProvider';
 import {Type} from '../../Utils/action.type'
-
+import Loading from '../Loading/Loading';
 const ProductCard = ({ data }) => {
     const { id, title, image, price, rating } = data;
-
+    const [isLoading, setIsLoading] = useState(true);
     const [state,dispatch] = useContext(DataContext);
     const addToCart = () => {
         dispatch({
@@ -16,7 +16,11 @@ const ProductCard = ({ data }) => {
         })
     }
     return (
-        <div className={classes.card_container}>
+        <>
+         {isLoading ? (
+          <Loading />
+        ) : (
+          <div className={classes.card_container}>
             <Link to={`/product/${id}`} className={classes.card_link}>
                 <img src={image} alt={title} />
                 <div className={classes.card_details}>
@@ -34,6 +38,10 @@ const ProductCard = ({ data }) => {
                 <button className={classes.button} onClick={addToCart}>Add to cart</button>
             </div>
         </div>
+        )}
+        </>
+       
+        
     );
 };
 

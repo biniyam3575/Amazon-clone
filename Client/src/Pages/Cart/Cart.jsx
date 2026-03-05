@@ -3,6 +3,7 @@ import Layout from "../../components/Layout/Layout";
 import { DataContext } from "../../components/DataProvider/DataProvider";
 import { Type } from "../../Utils/action.type";
 import classes from "./Cart.module.css";
+import { Link } from "react-router";
 
 const Cart = () => {
   const [itemToDelete, setItemToDelete] = React.useState(null);
@@ -112,9 +113,14 @@ const Cart = () => {
               Subtotal ({cart.reduce((a, c) => a + c.amount, 0)} items):{" "}
               <strong>${total.toFixed(2)}</strong>
             </p>
-            <button className={classes.checkout_btn}>
-              Proceed to checkout
-            </button>
+           {cart.length > 0 && (
+              <Link to="/payment">
+                <button className={classes.checkout_btn}>
+                  Proceed to checkout
+                </button>
+              </Link>
+            )}
+            
           </div>
         </div>
       </section>
