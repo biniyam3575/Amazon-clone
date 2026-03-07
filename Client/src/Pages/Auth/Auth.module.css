@@ -69,3 +69,8 @@
     display: block;
     margin-bottom: 10px;
 }
+.message{
+    color: #c45500;
+    text-align: center;
+    font-weight: bold;
+}

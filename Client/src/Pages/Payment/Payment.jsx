@@ -3,6 +3,9 @@ import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import Layout from '../../components/Layout/Layout';
 import { DataContext } from '../../components/DataProvider/DataProvider';
 import classes from './Payment.module.css';
+import { axiosInstance } from '../../Api/axios';
+import { db } from "../../Utils/firebase"; 
+import { doc, setDoc } from "firebase/firestore";
 
 const Payment = () => {
   const [{ cart, user }] = useContext(DataContext);
@@ -11,11 +14,71 @@ const Payment = () => {
 
   const [cardError,setCardError] = useState(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Stripe logic here
-  };
+  const stripe = useStripe();
+  const elements = useElements()
 
+  const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      // Stripe.js has not yet loaded.
+      return;
+    }
+
+    setProcessing(true);
+
+    try {
+      // 1. Contact your backend to get the Client Secret
+      // We send the total in subunits (e.g., cents)
+      const response = await axiosInstance({
+        method: "post",
+        url: `/payment/create?total=${Math.round(total * 100)}`,
+      });
+
+      const clientSecret = response.data?.clientSecret;
+
+      // 2. Client-side confirmation via Stripe
+      const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      });
+
+      if (error) {
+        setCardError(`Payment failed: ${error.message}`);
+        setProcessing(false);
+      } else {
+        // 3. Payment successful
+        // console.log("Payment Intent:", paymentIntent);
+        
+        // TODO: Save the order into your database (Firestore/MySQL) here
+        await setDoc(
+          doc(db, "users", user?.uid, "orders", paymentIntent.id),
+          {
+            cart: cart,
+            amount: paymentIntent.amount,
+            created: paymentIntent.created,
+          }
+        );
+        
+        setCardError(null);
+        setProcessing(false);
+        setSuccess(true);
+        
+        // Optional: Clear cart and redirect user to /orders
+        // dispatch({ type: 'EMPTY_CART' });
+        // navigate('/orders', { replace: true });
+      }
+
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      setCardError("An unexpected error occurred.");
+      setProcessing(false);
+    }
+  };
   const handelChange = (e)=>{
     console.log(e)
     e?.error?.type ? setCardError(e?.error?.message): setCardError('');
@@ -56,8 +119,8 @@ const Payment = () => {
                 </div>
                 <div className={classes.payment_price}>
                     <h3>Order Total: ${total.toFixed(2)}</h3>
-                    <button type="submit" className={classes.pay_btn}>
-                        Place your order
+                    <button type="submit" className={classes.pay_btn} disabled={processing || success}>
+                        {processing ? "Processing..." : "Place your order"}
                     </button>
                 </div>
               </form>

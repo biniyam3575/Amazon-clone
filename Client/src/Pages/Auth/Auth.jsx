@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate,useLocation } from 'react-router';
 import { auth } from '../../Utils/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import classes from './Auth.module.css';
@@ -15,6 +15,10 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectPath = location.state?.redirect || "/";
+  const message = location.state?.msg;
+
   const [{}, dispatch] = useContext(DataContext);
 
   const authHandler = async (e) => {
@@ -39,7 +43,7 @@ const Auth = () => {
       // Clear fields and navigate
       setEmail('');
       setPassword('');
-      navigate('/');
+      navigate(redirectPath);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -61,6 +65,7 @@ const Auth = () => {
         <h1 className={classes.login__title}>{isSigningUp ? 'Create account' : 'Sign-In'}</h1>
         
         {error && <small className={classes.error}>{error}</small>}
+        {message && <small className={classes.message}>{message}</small>}
 
         <h5 className={classes.login__label}>E-mail</h5>
         <input 
