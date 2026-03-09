@@ -1,15 +1,20 @@
 import React, { useContext, useEffect, useState } from "react";
+import { FaRegCheckCircle } from "react-icons/fa";
 import Layout from "../../components/Layout/Layout";
 import { DataContext } from "../../components/DataProvider/DataProvider";
 import { db } from "../../Utils/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import classes from "./Order.module.css";
-import Loading from "../../components/Loading/Loading"; // Assuming this is your loading component
+import Loading from "../../components/Loading/Loading"; 
+import { useLocation } from "react-router";
 
 const Order = () => {
   const [{ user }] = useContext(DataContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const location = useLocation();
+  const successMsg = location.state?.msg;
 
   useEffect(() => {
     if (user) {
@@ -36,12 +41,22 @@ const Order = () => {
     <Layout>
       <section className={classes.container}>
         <div className={classes.orders_container}>
+          
+          {/* 1. Success Notification (Disappears on Refresh) */}
+          {successMsg && (
+            <div className={classes.success_notification}>
+              <FaRegCheckCircle size={22} className={classes.success_icon} />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
           <h1>Your Orders</h1>
           
           {loading ? (
             <Loading /> 
           ) : (
             <div className={classes.orders_list}>
+              {/* 2. Better Logic: Check length clearly */}
               {orders?.length === 0 ? (
                 <div className={classes.no_orders}>
                    <p>You haven't placed any orders yet.</p>
@@ -49,16 +64,23 @@ const Order = () => {
               ) : (
                 orders.map((eachOrder) => (
                   <div key={eachOrder.id} className={classes.order_card}>
+                    
                     {/* Header: Order Meta Info */}
                     <div className={classes.order_header}>
                       <div className={classes.meta_group}>
                         <p className={classes.label}>ORDER PLACED</p>
-                        <p>{new Date(eachOrder.data.created * 1000).toLocaleDateString()}</p>
+                        {/* 3. Safe Date Check */}
+                        <p>
+                          {eachOrder.data?.created 
+                            ? new Date(eachOrder.data.created * 1000).toLocaleDateString() 
+                            : "Date processing..."}
+                        </p>
                       </div>
                       <div className={classes.meta_group}>
                         <p className={classes.label}>TOTAL</p>
                         <p className={classes.total_price}>
-                          ${(eachOrder.data.amount / 100).toFixed(2)}
+                          {/* 4. Safe Amount Check */}
+                          ${((eachOrder.data?.amount || 0) / 100).toFixed(2)}
                         </p>
                       </div>
                       <div className={classes.order_id_box}>
@@ -66,18 +88,22 @@ const Order = () => {
                       </div>
                     </div>
 
-                    {/* Body: List of Products in this order */}
+                    {/* Body: List of Products */}
                     <div className={classes.order_items}>
-                      {eachOrder.data.cart.map((item) => (
+                      {eachOrder.data?.cart?.map((item) => (
                         <div key={item.id} className={classes.single_item}>
-                          <img src={item.image} alt={item.title} />
+                          {/* 5. Fallback for missing images/titles */}
+                          <img 
+                            src={item.image || "https://via.placeholder.com/150"} 
+                            alt={item.title || "Product"} 
+                          />
                           <div className={classes.item_info}>
-                            <h3>{item.title}</h3>
+                            <h3>{item.title || "Untitled Product"}</h3>
                             <p className={classes.item_desc}>
                               {item.description?.slice(0, 150)}...
                             </p>
-                            <p className={classes.item_qty}>Quantity: {item.amount}</p>
-                            <p className={classes.item_price}>${item.price}</p>
+                            <p className={classes.item_qty}>Quantity: {item.amount || 1}</p>
+                            <p className={classes.item_price}>${item.price || "0.00"}</p>
                           </div>
                         </div>
                       ))}

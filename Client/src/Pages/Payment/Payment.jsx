@@ -6,16 +6,19 @@ import classes from './Payment.module.css';
 import { axiosInstance } from '../../Api/axios';
 import { db } from "../../Utils/firebase"; 
 import { doc, setDoc } from "firebase/firestore";
+import { Type } from '../../Utils/action.type'; // Ensure Type is imported
+import { useNavigate } from 'react-router'; // Import useNavigate
 
 const Payment = () => {
-  const [{ cart, user }] = useContext(DataContext);
+  const [{ cart, user }, dispatch] = useContext(DataContext);
+  const navigate = useNavigate(); // Initialize navigate
+
   const total = cart.reduce((sum, item) => sum + item.price * item.amount, 0);
   const totalItems = cart.reduce((sum, item) => sum + item.amount, 0);
 
-  const [cardError,setCardError] = useState(null);
-
+  const [cardError, setCardError] = useState(null);
   const stripe = useStripe();
-  const elements = useElements()
+  const elements = useElements();
 
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,16 +26,12 @@ const Payment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
-      // Stripe.js has not yet loaded.
-      return;
-    }
+    if (!stripe || !elements) return;
 
     setProcessing(true);
 
     try {
-      // 1. Contact your backend to get the Client Secret
-      // We send the total in subunits (e.g., cents)
+      // 1. Get Client Secret from backend
       const response = await axiosInstance({
         method: "post",
         url: `/payment/create?total=${Math.round(total * 100)}`,
@@ -40,7 +39,7 @@ const Payment = () => {
 
       const clientSecret = response.data?.clientSecret;
 
-      // 2. Client-side confirmation via Stripe
+      // 2. Confirm Payment with Stripe
       const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement),
@@ -51,10 +50,7 @@ const Payment = () => {
         setCardError(`Payment failed: ${error.message}`);
         setProcessing(false);
       } else {
-        // 3. Payment successful
-        // console.log("Payment Intent:", paymentIntent);
-        
-        // TODO: Save the order into your database (Firestore/MySQL) here
+        // 3. Save Order to Firestore
         await setDoc(
           doc(db, "users", user?.uid, "orders", paymentIntent.id),
           {
@@ -63,14 +59,19 @@ const Payment = () => {
             created: paymentIntent.created,
           }
         );
-        
+
+        // 4. EMPTY the cart in global state
+        dispatch({
+          type: Type.EMPTY_CART,
+        });
+
         setCardError(null);
         setProcessing(false);
         setSuccess(true);
         
-        // Optional: Clear cart and redirect user to /orders
-        // dispatch({ type: 'EMPTY_CART' });
-        // navigate('/orders', { replace: true });
+        // 5. REDIRECT to Orders page
+        // We use { replace: true } so the user can't click 'back' to go to the payment page again
+        navigate("/order", { state: { msg: "You have placed a new order" }, replace: true });
       }
 
     } catch (error) {
@@ -79,6 +80,7 @@ const Payment = () => {
       setProcessing(false);
     }
   };
+
   const handelChange = (e)=>{
     console.log(e)
     e?.error?.type ? setCardError(e?.error?.message): setCardError('');

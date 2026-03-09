@@ -7,22 +7,24 @@ import { auth } from './Utils/firebase.js'
 import { Type } from './Utils/action.type.js'
 function App() {
   const [user , dispatch] = useContext(DataContext);
-  useEffect(()=>{
-    auth.onAuthStateChanged((authuser)=>{
-      if(authuser){
-        dispatch({
-          type: Type.SET_USER,
-          user: authuser
-        })
-      }else{
-        dispatch({
-          type: Type.SET_USER,
-          user: null
-        })
-
-      }
-    })
-  },[])
+  useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged((authUser) => {
+        if (authUser) {
+          dispatch({
+            type: Type.SET_USER,
+            user: authUser,
+          });
+        } else {
+          dispatch({
+            type: Type.SET_USER,
+            user: null,
+          });
+        }
+        // IMPORTANT: Dispatch a 'SET_LOADING' false action here if you have one, 
+        // or ensure your state reflects that the auth check is finished.
+      });
+      return () => unsubscribe();
+    }, []);
 
   return (
     <>
