@@ -113,6 +113,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal {
@@ -152,4 +153,149 @@
 
 .confirm_btn:hover {
   background: #c9302c;
+}
+
+/* ===== RESPONSIVE ADDITIONS - ONLY FOR SMALL SCREENS ===== */
+@media screen and (max-width: 900px) {
+  .cart_container {
+    flex-direction: column;
+  }
+  
+  .cart_right {
+    order: -1; /* Moves subtotal to top on tablet */
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .cart_container {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .cart_left {
+    padding: 15px;
+  }
+  
+  .cart_item {
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+  }
+  
+  .cart_item img {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .cart_details {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .cart_price {
+    width: 100%;
+    text-align: right;
+    font-size: 16px;
+    margin-top: 5px;
+  }
+  
+  .controls {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .modal {
+    width: 90%;
+    max-width: 320px;
+    padding: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .cart_container {
+    padding: 5px;
+  }
+  
+  .cart_left {
+    padding: 12px;
+  }
+  
+  .cart_item {
+    padding: 15px 0;
+  }
+  
+  .cart_item img {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .cart_details h3 {
+    font-size: 14px;
+    margin: 0 0 5px 0;
+  }
+  
+  .qty_buttons button {
+    padding: 4px 10px;
+    font-size: 14px;
+  }
+  
+  .qty_buttons span {
+    padding: 0 8px;
+    font-size: 14px;
+  }
+  
+  .delete_btn {
+    font-size: 14px;
+  }
+  
+  .subtotal_box {
+    padding: 15px;
+  }
+  
+  .subtotal_box p {
+    font-size: 14px;
+  }
+  
+  .checkout_btn {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .modal_buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .cancel_btn,
+  .confirm_btn {
+    width: 100%;
+  }
+}
+
+/* Extra small devices */
+@media screen and (max-width: 360px) {
+  .cart_item img {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .cart_details {
+    min-width: 150px;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .qty_buttons {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .delete_btn {
+    width: 100%;
+    text-align: left;
+    padding: 5px 0;
+  }
 }

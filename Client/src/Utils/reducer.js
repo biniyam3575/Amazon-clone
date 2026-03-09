@@ -25,7 +25,7 @@ export const reducer = (state, action) => {
           updatedCart = [...state.cart, { ...action.item, amount: 1 }];
         }
 
-        // Save the updated cart to localStorage so it survives a refresh
+        // Save to localStorage
         localStorage.setItem("cart", JSON.stringify(updatedCart));
 
         return {
@@ -36,27 +36,38 @@ export const reducer = (state, action) => {
 
     case Type.UPDATE_QTY: {
       const { id, qty } = action;
+      let updatedCart;
 
       if (qty <= 0) {
-        return {
-          ...state,
-          cart: state.cart.filter((item) => item.id !== id),
-        };
+        // Remove item if quantity is 0 or less
+        updatedCart = state.cart.filter((item) => item.id !== id);
+      } else {
+        // Update quantity
+        updatedCart = state.cart.map((item) =>
+          item.id === id ? { ...item, amount: qty } : item
+        );
       }
+
+      // Save to localStorage
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
 
       return {
         ...state,
-        cart: state.cart.map((item) =>
-          item.id === id ? { ...item, amount: qty } : item
-        ),
+        cart: updatedCart,
       };
     }
 
-    case Type.REMOVE_FROM_CART:
+    case Type.REMOVE_FROM_CART: {
+      const updatedCart = state.cart.filter((item) => item.id !== action.id);
+      
+      // Save to localStorage
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      
       return {
         ...state,
-        cart: state.cart.filter((item) => item.id !== action.id),
+        cart: updatedCart,
       };
+    }
 
     case Type.SET_USER:
           if(action.user) {
@@ -70,6 +81,7 @@ export const reducer = (state, action) => {
           };
 
       case Type.EMPTY_CART:
+        localStorage.removeItem("cart");
         return {
           ...state,
           cart: [],

@@ -23,63 +23,62 @@ const Payment = () => {
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!stripe || !elements) return;
 
-    if (!stripe || !elements) return;
+  setProcessing(true);
 
-    setProcessing(true);
+  try {
+    // 1. Get Client Secret
+    const response = await axiosInstance({
+      method: "post",
+      url: `/payment/create?total=${Math.round(total * 100)}`,
+    });
 
-    try {
-      // 1. Get Client Secret from backend
-      const response = await axiosInstance({
-        method: "post",
-        url: `/payment/create?total=${Math.round(total * 100)}`,
-      });
+    const clientSecret = response.data?.clientSecret;
 
-      const clientSecret = response.data?.clientSecret;
+    // 2. Confirm Payment
+    const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: elements.getElement(CardElement),
+      },
+    });
 
-      // 2. Confirm Payment with Stripe
-      const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-        },
-      });
-
-      if (error) {
-        setCardError(`Payment failed: ${error.message}`);
-        setProcessing(false);
-      } else {
-        // 3. Save Order to Firestore
-        await setDoc(
-          doc(db, "users", user?.uid, "orders", paymentIntent.id),
-          {
-            cart: cart,
-            amount: paymentIntent.amount,
-            created: paymentIntent.created,
-          }
-        );
-
-        // 4. EMPTY the cart in global state
-        dispatch({
-          type: Type.EMPTY_CART,
-        });
-
-        setCardError(null);
-        setProcessing(false);
-        setSuccess(true);
-        
-        // 5. REDIRECT to Orders page
-        // We use { replace: true } so the user can't click 'back' to go to the payment page again
-        navigate("/order", { state: { msg: "You have placed a new order" }, replace: true });
-      }
-
-    } catch (error) {
-      console.error("Error processing payment:", error);
-      setCardError("An unexpected error occurred.");
+    if (error) {
+      setCardError(`Payment failed: ${error.message}`);
       setProcessing(false);
+    } else {
+      // 3. Save Order to Firestore (Wait for this to finish!)
+      await setDoc(
+        doc(db, "users", user?.uid, "orders", paymentIntent.id),
+        {
+          cart: cart,
+          amount: paymentIntent.amount,
+          created: paymentIntent.created,
+        }
+      );
+
+      // 4. EMPTY the cart 
+      // This now triggers the localStorage.removeItem("cart") in your reducer
+      dispatch({
+        type: Type.EMPTY_CART,
+      });
+
+      setCardError(null);
+      setProcessing(false);
+      setSuccess(true);
+      
+      // 5. REDIRECT
+      navigate("/order", { state: { msg: "You have placed a new order" }, replace: true });
     }
-  };
+
+  } catch (error) {
+    console.error("Error processing payment:", error);
+    setCardError("An unexpected error occurred.");
+    setProcessing(false);
+  }
+};
 
   const handelChange = (e)=>{
     console.log(e)
